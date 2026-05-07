@@ -1,127 +1,141 @@
 # Korean Landmark Image Dataset Collector
 
-청와대, 낙산공원, 국립현대미술관, 명동대성당 이미지를 클래스별 약 1000장까지 모으는 수집 도구입니다.
+한국 랜드마크 이미지를 자동으로 저장하는 간단한 수집 도구입니다.
 
-## 설치
+Google Maps 리뷰, Naver Map 리뷰, Google/Naver 이미지 검색 화면을 직접 열어두면, 프로그램이 열린 Chrome에서 이미지 URL을 찾아 다운로드합니다.
 
-```powershell
-cd image_dataset_collector
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
+## 가장 쉬운 사용법
 
-## 가장 쉬운 실행
+### 1. Chrome 수집 창 열기
 
-1. `launch_chrome_capture.bat`을 더블클릭합니다.
-2. 열린 Chrome 안에서 Google Maps 리뷰 탭, Naver Map 방문자 리뷰, Google/Naver 이미지 검색 탭을 엽니다.
-3. 사진이 계속 보이도록 아래로 스크롤합니다.
-4. `run_collector.bat`을 더블클릭하면 수집할 장소 이름을 물어봅니다.
+`launch_chrome_capture.bat`을 더블클릭합니다.
+
+새 Chrome 창이 열리면 그 창에서 원하는 페이지를 직접 열면 됩니다.
 
 예:
 
+- Google Maps에서 장소 검색 후 리뷰 탭 열기
+- Naver Map에서 장소 검색 후 방문자 리뷰 열기
+- Google 이미지 검색에서 `청와대 고화질` 검색
+- Naver 이미지 검색에서 `청와대` 검색
+
+### 2. 사진이 보이게 스크롤하기
+
+리뷰나 이미지 검색 결과를 아래로 계속 스크롤합니다.
+
+화면에 사진이 많이 로드될수록 프로그램이 가져올 후보도 많아집니다.
+
+### 3. 수집기 실행하기
+
+Chrome 창은 닫지 말고 그대로 둔 상태에서 `run_collector.bat`을 더블클릭합니다.
+
+그러면 아래처럼 물어봅니다.
+
 ```text
-이름: 경복궁
-추가 검색어 또는 영어 이름(선택, 쉼표로 구분): Gyeongbokgung Palace Seoul
-Google Maps 리뷰 URL(선택, 비우면 이름으로 자동 검색): 
-Tripadvisor URL(선택, 비우면 건너뜀): 
+이름: 청와대
+추가 검색어 또는 영어 이름(선택, 쉼표로 구분):
+Google Maps 리뷰 URL(선택, 비우면 이름으로 자동 검색):
+Tripadvisor URL(선택, 비우면 건너뜀):
 몇 장까지 가져올까요? 기본 1000: 1000
 열린 Chrome에서 이미지 캡처할 시간(초), 기본 180: 180
 ```
 
-입력한 장소는 `dataset/<번호_장소명>/` 아래에 저장됩니다.
-수집 중에는 현재 장수, 목표 장수, 남은 장수가 함께 표시됩니다.
-Tripadvisor URL은 직접 넣은 경우에만 사용합니다. 기본 실행에서는 Chrome 캡처가 Google/Naver 리뷰 사진을 담당합니다.
+보통은 이렇게 입력하면 됩니다.
 
-기본 리뷰 source는 API가 아니라, 사용자가 직접 열어둔 Chrome에 연결해서 현재 로드되는 Google/Naver 리뷰 사진 URL을 수집합니다. 프로그램이 Google/Naver를 자동으로 클릭하거나 검색하지 않습니다.
+- `이름`: 수집할 장소 이름
+- `추가 검색어`: 몰라도 비워도 됨
+- `Google Maps 리뷰 URL`: 비워도 됨
+- `Tripadvisor URL`: 비워도 됨
+- `몇 장`: 원하는 이미지 수
+- `캡처 시간`: 기본값 그대로 두거나, 더 오래 스크롤할 거면 300 정도 입력
 
-## 소량 테스트
+## 저장 위치
 
-```powershell
-python collect_landmark_images.py --config landmarks.yaml --target 5 --max-search-results 30
-```
-
-## 1000장 수집
-
-```powershell
-python collect_landmark_images.py --config landmarks.yaml --target 1000 --max-search-results 1800
-```
-
-열린 Chrome 캡처, Wikimedia, 일반 이미지 검색을 모두 쓰려면:
-
-```powershell
-python collect_landmark_images.py --config landmarks.yaml --target 1000 --max-search-results 1800 --sources chrome_debug_capture,commons,duckduckgo
-```
-
-열린 Chrome 캡처 시간을 늘리려면:
-
-```powershell
-python collect_landmark_images.py --config landmarks.yaml --target 1000 --max-search-results 1800 --capture-seconds 300 --sources chrome_debug_capture,commons,duckduckgo
-```
-
-수집 결과는 기본적으로 `dataset/<class_id>/` 아래에 저장되고, 각 클래스 폴더에는 `manifest.csv`와 `rejected.csv`가 생성됩니다.
-
-## 검증
-
-```powershell
-python collect_landmark_images.py --config landmarks.yaml --report-only
-```
-
-## 리뷰 사진을 추가로 넣기
-
-`--sources chrome_debug_capture`를 켜면 `launch_chrome_capture.bat`으로 열어둔 Chrome에 연결해서, 현재 탭들에 로드되는 사용자 리뷰 사진 후보를 저장합니다.
-
-수집 기준:
-
-- Google 저장: `lh3.googleusercontent.com/grass-cs/...` 계열 또는 `리뷰에 포함된` label이 붙은 이미지, Google 이미지 탭의 `encrypted-tbn*.gstatic.com/images` 후보
-- Naver 저장: `pup-review-phinf.pstatic.net` 방문자 리뷰 이미지
-- Naver 이미지 검색 저장: `search.pstatic.net` proxy에서 원본 `src`를 추출한 후보
-- 제외: 프로필 사진, 지도 타일, UI 아이콘, 너무 작은 이미지
-
-`--sources google_image_search`를 켜면 Google 이미지 탭에서 이미지 후보를 추가로 가져옵니다. 이것도 브라우저가 보이는 상태로 열립니다.
-
-`--sources tripadvisor`를 켜고 Tripadvisor URL을 직접 입력하면 해당 페이지를 headless browser로 열고 스크롤하면서 페이지 안에 로드된 이미지 후보를 같은 다운로드/중복 제거/해상도 검증 파이프라인으로 저장합니다. URL이 없으면 건너뜁니다.
-
-직접 확보한 이미지 URL도 `review_sources/<class_id>.csv`에 넣어 추가할 수 있습니다.
-
-예:
-
-```csv
-image_url,page_url,title
-https://example.com/photo1.jpg,https://example.com/review-page,front view
-https://example.com/photo2.jpg,https://example.com/review-page,night view
-```
-
-실행:
-
-```powershell
-python collect_landmark_images.py --config landmarks.yaml --target 1000 --sources chrome_debug_capture,commons,duckduckgo --import-url-csv-dir review_sources
-```
-
-## 이미 받은 로컬 이미지를 합치기
-
-클래스별 폴더를 아래처럼 만든 뒤 import할 수 있습니다.
+이미지는 아래 폴더에 저장됩니다.
 
 ```text
-local_sources/
-  13_cheongwadae/
-  14_naksan_park/
-  15_mmca/
-  16_myeongdong_cathedral/
+dataset/<장소명>/
 ```
 
-실행:
+예를 들어 `청와대`를 입력하면 대략 이런 폴더가 생깁니다.
+
+```text
+dataset/05_청와대/
+```
+
+각 폴더 안에는 이미지와 함께 아래 파일이 생깁니다.
+
+- `manifest.csv`: 저장된 이미지 기록
+- `rejected.csv`: 중복, 너무 작은 이미지, 오류 이미지 등으로 제외된 기록
+
+## 중복 방지
+
+이미 받은 이미지는 다시 저장하지 않습니다.
+
+프로그램은 이미지 파일 내용을 `sha256`으로 기록합니다. 그래서 같은 이미지가 다시 나오면 `duplicate_sha256`으로 판단하고 `rejected.csv`에만 기록합니다.
+
+주의할 점:
+
+- 이미지를 직접 삭제해도 `manifest.csv`를 그대로 두면, 그 이미지는 “이미 받은 것”으로 취급됩니다.
+- 같은 사진이라도 크롭, 리사이즈, 압축이 다르면 다른 이미지로 판단될 수 있습니다.
+
+## 데이터 검증
+
+중복이나 누락 상태를 확인하려면 PowerShell에서 실행합니다.
 
 ```powershell
-python collect_landmark_images.py --config landmarks.yaml --target 1000 --import-local-dir local_sources
+python verify_dataset.py --dataset-dir dataset
 ```
 
-## 주의
+가상환경을 쓰는 경우:
 
-- Google 리뷰 수집은 `lh3.googleusercontent.com/grass-cs/...` 계열과 `aria-label`의 `리뷰에 포함된` 정보를 우선 사용하고, Google 프로필 사진과 지도/UI 이미지는 제외합니다.
-- Google 이미지 탭 수집은 검색 결과 기반이라 오염 이미지가 섞일 수 있습니다.
-- 웹 검색 결과는 정확도가 완벽하지 않으므로, 학습 전에 샘플을 눈으로 검수하거나 CLIP/분류기 기반 필터링을 추가하는 것이 좋습니다.
-- 이 도구는 이미지 URL과 출처를 `manifest.csv`에 남깁니다. 공개 웹 이미지라도 라이선스와 사용 조건은 별도로 확인해야 합니다.
-- Google 리뷰/Maps, Tripadvisor 후보는 페이지 구조와 사이트 차단 정책에 따라 수집량이 크게 달라질 수 있습니다.
-- Tripadvisor는 자동 접근 시 captcha/anti-bot 페이지를 반환할 수 있으며, 이 경우 해당 source에서는 0장이 저장될 수 있습니다.
-- `target=1000`은 “최대 1000장까지 시도”입니다. 검색 결과 품질, 중복, 서버 차단, 라이선스 문제 때문에 실제 저장 수가 더 적을 수 있습니다.
+```powershell
+.\.venv\Scripts\python.exe verify_dataset.py --dataset-dir dataset
+```
+
+## 설치가 필요한 경우
+
+처음 실행할 때 `run_collector.bat`이 필요한 패키지를 설치합니다.
+
+직접 설치하고 싶으면 아래 명령을 사용합니다.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m playwright install chromium
+```
+
+## 고급 실행
+
+명령어로 직접 실행할 수도 있습니다.
+
+```powershell
+python collect_landmark_images.py --interactive --target 1000 --max-search-results 1800 --capture-seconds 180 --sources chrome_debug_capture,commons,duckduckgo
+```
+
+Chrome 캡처 시간을 늘리려면:
+
+```powershell
+python collect_landmark_images.py --interactive --target 1000 --capture-seconds 300 --sources chrome_debug_capture,commons,duckduckgo
+```
+
+## GitHub에 올릴 때 주의
+
+아래 폴더와 파일은 `.gitignore`에 들어가 있으므로 기본적으로 GitHub에 올라가지 않습니다.
+
+```text
+.venv/
+dataset/
+.env
+__pycache__/
+chrome_capture_launch.log
+```
+
+## 주의사항
+
+- 검색 결과 기반 수집이라 잘못된 이미지가 섞일 수 있습니다.
+- 학습 데이터로 쓰기 전에는 샘플을 직접 확인하는 것이 좋습니다.
+- `manifest.csv`에는 이미지 URL과 출처 URL이 기록됩니다.
+- 공개 웹 이미지라도 라이선스와 사용 조건은 별도로 확인해야 합니다.
+- Google/Naver/Tripadvisor 페이지 구조나 차단 정책에 따라 수집량이 달라질 수 있습니다.
