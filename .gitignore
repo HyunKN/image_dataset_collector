@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+dataset/
+.env
+chrome-capture-profile/
+chrome_capture_launch.log
